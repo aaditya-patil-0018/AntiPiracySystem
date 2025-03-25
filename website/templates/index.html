@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AntiPiracy System - Advanced Digital Protection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#4F46E5',
+                        dark: '#0F172A',
+                    },
+                    animation: {
+                        'gradient': 'gradient 8s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="text-gray-100">
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-effect">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">AntiPiracy</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="hover:text-primary transition-colors">Features</a>
+                    <a href="#how-it-works" class="hover:text-primary transition-colors">How it Works</a>
+                    <!-- <a href="#pricing" class="hover:text-primary transition-colors">Pricing</a> -->
+                    <a href="/getin" class="px-6 py-2 bg-primary hover:bg-secondary rounded-full transition-colors">Get Started</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center pt-20">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row items-center justify-between">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                        Protect Your Digital Assets with
+                        <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent animate-gradient">
+                            Advanced Security
+                        </span>
+                    </h1>
+                    <p class="text-xl text-gray-300 mb-8">
+                        State-of-the-art anti-piracy system that safeguards your intellectual property with cutting-edge technology and real-time monitoring.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#demo" class="px-8 py-3 bg-primary hover:bg-secondary rounded-full transition-colors">
+                            Request Demo
+                        </a>
+                        <a href="#learn-more" class="px-8 py-3 border border-primary hover:bg-primary/10 rounded-full transition-colors">
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2 relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl"></div>
+                    <div class="relative animate-float">
+                        <svg class="w-full h-auto" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Rounded rectangle background -->
+                            <rect x="50" y="100" width="400" height="300" rx="60" fill="url(#paint0_linear)"/>
+                            <!-- Play triangle -->
+                            <path d="M200 200L350 300L200 400V200Z" fill="url(#paint1_linear)"/>
+                            <!-- Shield overlay -->
+                            <path d="M250 150C350 150 400 200 400 250C400 350 250 400 250 400C250 400 100 350 100 250C100 200 150 150 250 150Z" fill="url(#paint2_linear)" fill-opacity="0.3"/>
+                            <defs>
+                                <linearGradient id="paint0_linear" x1="50" y1="100" x2="450" y2="400" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#8B5CF6"/>
+                                    <stop offset="1" stop-color="#4F46E5"/>
+                                </linearGradient>
+                                <linearGradient id="paint1_linear" x1="200" y1="200" x2="350" y2="400" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#8B5CF6"/>
+                                    <stop offset="1" stop-color="#4F46E5"/>
+                                </linearGradient>
+                                <linearGradient id="paint2_linear" x1="100" y1="150" x2="400" y2="400" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#8B5CF6"/>
+                                    <stop offset="1" stop-color="#4F46E5"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20">
+        <div class="container mx-auto px-6">
+            <h2 class="text-4xl font-bold text-center mb-16">
+                Powerful Features for
+                <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    Maximum Protection
+                </span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass-effect p-8 rounded-2xl hover:transform hover:scale-105 transition-all">
+                    <div class="w-16 h-16 bg-primary/20 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">Real-time Monitoring</h3>
+                    <p class="text-gray-300">24/7 surveillance of your digital assets with instant alerts for any suspicious activities.</p>
+                </div>
+                <div class="glass-effect p-8 rounded-2xl hover:transform hover:scale-105 transition-all">
+                    <div class="w-16 h-16 bg-primary/20 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">Advanced Encryption</h3>
+                    <p class="text-gray-300">Military-grade encryption protocols to ensure your content remains secure and protected.</p>
+                </div>
+                <div class="glass-effect p-8 rounded-2xl hover:transform hover:scale-105 transition-all">
+                    <div class="w-16 h-16 bg-primary/20 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-4">Analytics Dashboard</h3>
+                    <p class="text-gray-300">Comprehensive insights and analytics to track and manage your content protection strategy.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20">
+        <div class="container mx-auto px-6">
+            <div class="glass-effect rounded-3xl p-12 text-center">
+                <h2 class="text-4xl font-bold mb-6">
+                    Ready to Protect Your Digital Assets?
+                </h2>
+                <p class="text-xl text-gray-300 mb-8">
+                    Join thousands of satisfied customers who trust our anti-piracy system.
+                </p>
+                <a href="#get-started" class="px-8 py-3 bg-primary hover:bg-secondary rounded-full transition-colors inline-block">
+                    Start Free Trial
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-gray-800">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-8 md:mb-0">
+                    <span class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">AntiPiracy</span>
+                    <p class="text-gray-400 mt-2">Advanced Digital Protection System</p>
+                </div>
+                <div class="flex space-x-6">
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-primary transition-colors">Contact</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

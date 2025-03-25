@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Started - AntiPiracy System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#4F46E5',
+                        dark: '#0F172A',
+                    },
+                    animation: {
+                        'gradient': 'gradient 8s linear infinite',
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+        .input-focus:focus {
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.5);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="container mx-auto max-w-4xl">
+        <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+            <!-- Left Side - Form -->
+            <div class="w-full md:w-1/2">
+                <div class="glass-effect rounded-3xl p-8 md:p-12">
+                    <div class="text-center mb-8">
+                        <h1 class="text-3xl font-bold mb-2">
+                            <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                                Welcome Back
+                            </span>
+                        </h1>
+                        <p class="text-gray-400">Secure your digital assets with our advanced protection system</p>
+                    </div>
+                    
+                    <form class="space-y-6" action="/getin" method="POST">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                                </svg>
+                            </div>
+                            <input type="email" name="email" placeholder="Email address" 
+                                class="w-full pl-12 pr-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none input-focus">
+                        </div>
+                        
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                            </div>
+                            <input type="password" name="password" placeholder="Password" 
+                                class="w-full pl-12 pr-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white placeholder-gray-400 focus:outline-none input-focus">
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="form-checkbox h-4 w-4 text-primary rounded border-gray-700 bg-white/5">
+                                <span class="ml-2 text-sm text-gray-400">Remember me</span>
+                            </label>
+                            <a href="#" class="text-sm text-primary hover:text-secondary transition-colors">Forgot password?</a>
+                        </div>
+
+                        <button type="submit" 
+                            class="w-full py-3 bg-gradient-to-r from-primary to-secondary rounded-xl text-white font-medium hover:opacity-90 transition-opacity">
+                            Sign In
+                        </button>
+
+                        <div class="relative my-6">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t border-gray-700"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="px-2 bg-[#0F172A] text-gray-400">Or continue with</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <button type="button" class="flex items-center justify-center px-4 py-3 border border-gray-700 rounded-xl hover:bg-white/5 transition-colors">
+                                <svg class="w-5 h-5 mr-2" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z"/>
+                                </svg>
+                                <span class="text-sm">Google</span>
+                            </button>
+                            <button type="button" class="flex items-center justify-center px-4 py-3 border border-gray-700 rounded-xl hover:bg-white/5 transition-colors">
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm-2 16h-2v-6h2v6zm-1-6.891c-.607 0-1.1-.496-1.1-1.109 0-.612.492-1.109 1.1-1.109s1.1.497 1.1 1.109c0 .613-.492 1.109-1.1 1.109zm8 6.891h-1.998v-2.861c0-1.881-2.002-1.722-2.002 0v2.861h-2v-6h2v1.093c.872-1.616 4-1.736 4 1.548v3.359z"/>
+                                </svg>
+                                <span class="text-sm">LinkedIn</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <p class="mt-8 text-center text-sm text-gray-400">
+                        Don't have an account? 
+                        <a href="#" class="text-primary hover:text-secondary transition-colors">Sign up</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Right Side - Visual Elements -->
+            <div class="w-full md:w-1/2 relative">
+                <div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-full blur-3xl"></div>
+                <div class="relative space-y-8">
+                    <!-- Animated Security Shield -->
+                    <div class="animate-float">
+                        <svg class="w-full h-auto" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Hexagonal Shield Base -->
+                            <path d="M250 50L450 150V350L250 450L50 350V150L250 50Z" fill="url(#paint0_linear)" />
+                            
+                            <!-- Inner Hexagon -->
+                            <path d="M250 150L375 215V345L250 410L125 345V215L250 150Z" fill="url(#paint1_linear)" opacity="0.8" />
+                            
+                            <!-- Center Circle with Lock Design -->
+                            <circle cx="250" cy="280" r="60" fill="url(#paint2_linear)" />
+                            <!-- <path d="M250 240V260M225 280H275M235 280C235 272.268 241.268 266 249 266H251C258.732 266 265 272.268 265 280V300C265 307.732 258.732 314 251 314H249C241.268 314 235 307.732 235 300V280Z" 
+                                  stroke="#0F172A" stroke-width="6" stroke-linecap="round" /> -->
+                            
+                            <!-- Decorative Lines -->
+                            <path d="M250 50L250 150" stroke="url(#paint3_linear)" stroke-width="4" stroke-linecap="round" opacity="0.6" />
+                            <path d="M450 150L375 215" stroke="url(#paint3_linear)" stroke-width="4" stroke-linecap="round" opacity="0.6" />
+                            <path d="M50 150L125 215" stroke="url(#paint3_linear)" stroke-width="4" stroke-linecap="round" opacity="0.6" />
+                            
+                            <defs>
+                                <linearGradient id="paint0_linear" x1="50" y1="50" x2="450" y2="450" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#8B5CF6"/>
+                                    <stop offset="1" stop-color="#4F46E5"/>
+                                </linearGradient>
+                                <linearGradient id="paint1_linear" x1="125" y1="150" x2="375" y2="410" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#8B5CF6"/>
+                                    <stop offset="1" stop-color="#4F46E5"/>
+                                </linearGradient>
+                                <linearGradient id="paint2_linear" x1="190" y1="220" x2="310" y2="340" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#8B5CF6"/>
+                                    <stop offset="1" stop-color="#4F46E5"/>
+                                </linearGradient>
+                                <linearGradient id="paint3_linear" x1="50" y1="50" x2="450" y2="450" gradientUnits="userSpaceOnUse">
+                                    <stop stop-color="#8B5CF6"/>
+                                    <stop offset="1" stop-color="#4F46E5"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <!-- Security Features -->
+                    <div class="glass-effect rounded-2xl p-6">
+                        <h3 class="text-lg font-semibold mb-4">Security Features</h3>
+                        <ul class="space-y-3">
+                            <li class="flex items-center text-sm text-gray-300">
+                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Two-factor authentication
+                            </li>
+                            <li class="flex items-center text-sm text-gray-300">
+                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                End-to-end encryption
+                            </li>
+                            <li class="flex items-center text-sm text-gray-300">
+                                <svg class="w-5 h-5 text-primary mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                </svg>
+                                Secure password hashing
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
