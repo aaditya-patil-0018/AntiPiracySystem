@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Protected Video - AntiPiracy System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#8B5CF6',
+                        secondary: '#4F46E5',
+                        dark: '#0F172A',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-effect fixed w-full z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                        AntiPiracy System
+                    </span>
+                </div>
+                <a href="{{ url_for('index') }}" class="px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors">
+                    Home
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 pt-24 pb-12">
+        <!-- Video Information -->
+        <div class="max-w-4xl mx-auto">
+            <div class="glass-effect rounded-xl p-6 mb-8">
+                <h1 class="text-2xl font-semibold mb-2">{{ video.filename }}</h1>
+                <div class="text-gray-400 text-sm space-y-1">
+                    <p>Uploaded: {{ video.upload_date }}</p>
+                    <p>Size: {{ video.size_mb }} MB</p>
+                    <p>Duration: {{ video.duration }} seconds</p>
+                </div>
+            </div>
+
+            <!-- Video Player -->
+            <!-- <div class="glass-effect rounded-xl overflow-hidden mb-8">
+                <video id="videoPlayer" class="w-full aspect-video" controls>
+                    <source src="{{ url_for('download_video', video_id=video.video_id, version='processed') }}" type="video/mp4">
+                    Your browser does not support the video tag.
+                </video>
+            </div> -->
+
+            <!-- Protection Information -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="glass-effect rounded-xl p-6">
+                    <h2 class="text-lg font-semibold mb-4">Protection Features</h2>
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                            </svg>
+                            <span>Watermarked Video</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                            </svg>
+                            <span>Encrypted Content</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                            <span>Fingerprint Protected</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-effect rounded-xl p-6">
+                    <h2 class="text-lg font-semibold mb-4">Download Options</h2>
+                    <div class="space-y-4">
+                        <a href="{{ url_for('download_video', video_id=video.video_id, version='processed') }}" 
+                           class="w-full py-3 bg-gradient-to-r from-primary to-secondary rounded-xl text-white font-medium 
+                                  hover:opacity-90 transition-opacity flex items-center justify-center space-x-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                            </svg>
+                            <span>Download Protected Video</span>
+                        </a>
+                        <p class="text-sm text-gray-400 text-center">
+                            This video is protected by AntiPiracy System. Unauthorized distribution is prohibited.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add any additional JavaScript for video player customization here
+        const videoPlayer = document.getElementById('videoPlayer');
+        
+        // Example: Add error handling for video loading
+        videoPlayer.addEventListener('error', function(e) {
+            console.error('Error loading video:', e);
+            // Show user-friendly error message
+            const errorMessage = document.createElement('div');
+            errorMessage.className = 'p-4 bg-red-500/20 text-red-200 rounded-lg mt-4';
+            errorMessage.textContent = 'Error loading video. Please try again later.';
+            videoPlayer.parentNode.appendChild(errorMessage);
+        });
+    </script>
+</body>
+</html> 

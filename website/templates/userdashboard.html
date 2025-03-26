@@ -59,6 +59,24 @@
         .progress-bar {
             transition: width 0.3s ease;
         }
+        .processing-step {
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+        }
+        
+        .processing-step.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .copy-link {
+            transition: all 0.3s ease;
+        }
+        
+        .copy-link:hover {
+            background: rgba(139, 92, 246, 0.2);
+        }
     </style>
 </head>
 <body class="text-gray-100 min-h-screen">
@@ -164,49 +182,64 @@
 
             <!-- Right Side - Output Area -->
             <div class="glass-effect rounded-xl p-6 dash-border">
-                <h2 class="text-xl font-semibold mb-6">Protected Video</h2>
+                <h2 class="text-xl font-semibold mb-6">Processing Status</h2>
                 
-                <!-- Output Preview -->
-                <div class="aspect-video bg-black/20 rounded-xl overflow-hidden mb-6">
-                    <div class="w-full h-full flex items-center justify-center">
-                        <div class="text-center">
-                            <div class="w-16 h-16 mx-auto bg-primary/20 rounded-full flex items-center justify-center mb-4">
-                                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                <!-- Processing Steps -->
+                <div id="processingSteps" class="space-y-6 mb-8 hidden">
+                    <div class="processing-step" id="step1">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                                <svg class="w-5 h-5 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
                             </div>
-                            <p class="text-gray-400">Protected video will appear here</p>
+                            <span class="text-gray-300">Generating Fingerprint...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="processing-step" id="step2">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                                <svg class="w-5 h-5 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-300">Applying Watermark...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="processing-step" id="step3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                                <svg class="w-5 h-5 text-primary animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </div>
+                            <span class="text-gray-300">Encrypting Video...</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Protection Status -->
-                <div class="space-y-4">
-                    <div class="glass-effect rounded-lg p-4">
-                        <h3 class="font-medium mb-2">Protection Status</h3>
-                        <div class="space-y-2">
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-400">Watermark Status</span>
-                                <span class="text-green-400">Active</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-400">Encryption Level</span>
-                                <span class="text-primary">High</span>
-                            </div>
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm text-gray-400">Tracking Status</span>
-                                <span class="text-green-400">Enabled</span>
-                            </div>
+                <!-- Share Link Section -->
+                <div id="shareLinkSection" class="hidden">
+                    <div class="glass-effect rounded-lg p-4 mb-6">
+                        <h3 class="font-medium mb-4">Share Protected Video</h3>
+                        <div class="flex items-center space-x-2">
+                            <input type="text" id="shareLink" readonly 
+                                class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-sm text-gray-300"
+                                value="">
+                            <button onclick="copyShareLink()" 
+                                class="copy-link flex items-center space-x-2 px-4 py-2 rounded-lg border border-primary/20 text-primary hover:bg-primary/20 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path>
+                                </svg>
+                                <span>Copy</span>
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Download Button -->
-                    <button class="w-full py-3 bg-gradient-to-r from-primary to-secondary rounded-xl text-white font-medium hover:opacity-90 transition-opacity flex items-center justify-center space-x-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                        </svg>
-                        <span>Download Protected Video</span>
-                    </button>
                 </div>
             </div>
         </div>
@@ -273,7 +306,21 @@
             progressBar.style.width = '0%';
             progressText.textContent = '0%';
 
+            // Show processing steps
+            document.getElementById('processingSteps').classList.remove('hidden');
+            document.getElementById('shareLinkSection').classList.add('hidden');
+
             try {
+                // Start processing animation
+                showProcessingStep(1);
+                await delay(2000); // Simulate fingerprinting time
+                
+                showProcessingStep(2);
+                await delay(2000); // Simulate watermarking time
+                
+                showProcessingStep(3);
+                await delay(2000); // Simulate encryption time
+
                 const response = await fetch('/upload', {
                     method: 'POST',
                     body: formData
@@ -282,36 +329,74 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    // Simulate upload progress
-                    let progress = 0;
-                    const interval = setInterval(() => {
-                        progress += 5;
-                        progressBar.style.width = `${progress}%`;
-                        progressText.textContent = `${progress}%`;
+                    // Complete the progress bar
+                    completeProgress();
+                    
+                    // Show all steps as completed
+                    document.querySelectorAll('.processing-step').forEach(step => {
+                        step.querySelector('svg').classList.remove('animate-spin');
+                        step.querySelector('svg').innerHTML = `
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M5 13l4 4L19 7" class="text-green-400"></path>
+                        `;
+                    });
 
-                        if (progress >= 100) {
-                            clearInterval(interval);
-                            setTimeout(() => {
-                                uploadProgress.classList.add('hidden');
-                                progressBar.style.width = '0%';
-                                progressText.textContent = '0%';
-                                // Add the uploaded file to recent uploads
-                                addRecentUpload(file.name, file.size);
-                            }, 1000);
-                        }
-                    }, 100);
+                    // Show and populate share link
+                    document.getElementById('shareLinkSection').classList.remove('hidden');
+                    const shareLink = `${window.location.origin}/video/${result.video_id}`;
+                    document.getElementById('shareLink').value = shareLink;
 
                     // Show success message
-                    showFlashMessage('File uploaded successfully!', 'success');
+                    showFlashMessage('File processed successfully!', 'success');
+                    
+                    // Add to recent uploads
+                    addRecentUpload(file.name, file.size);
                 } else {
                     throw new Error(result.message);
                 }
             } catch (error) {
-                showFlashMessage(error.message || 'Error uploading file', 'error');
+                showFlashMessage(error.message || 'Error processing file', 'error');
+                document.getElementById('processingSteps').classList.add('hidden');
                 uploadProgress.classList.add('hidden');
-                progressBar.style.width = '0%';
-                progressText.textContent = '0%';
             }
+        }
+
+        // Helper functions
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        function showProcessingStep(stepNumber) {
+            const steps = document.querySelectorAll('.processing-step');
+            steps.forEach((step, index) => {
+                if (index < stepNumber) {
+                    step.classList.add('active');
+                }
+            });
+        }
+
+        function completeProgress() {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 5;
+                progressBar.style.width = `${progress}%`;
+                progressText.textContent = `${progress}%`;
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        uploadProgress.classList.add('hidden');
+                    }, 1000);
+                }
+            }, 50);
+        }
+
+        function copyShareLink() {
+            const shareLink = document.getElementById('shareLink');
+            shareLink.select();
+            document.execCommand('copy');
+            
+            showFlashMessage('Link copied to clipboard!', 'success');
         }
 
         function addRecentUpload(filename, size) {
