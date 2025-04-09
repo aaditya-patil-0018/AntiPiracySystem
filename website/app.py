@@ -227,17 +227,17 @@ def upload_video():
                     raise Exception(fingerprint_result['message'])
                 
                 # Apply watermark
-                watermark_result = watermarker.apply_watermark(
-                    input_path=temp_path,
-                    output_path=processed_path,
-                    watermark_text=f"Protected - {video_id[:8]}"
-                )
-                if not watermark_result['success']:
-                    raise Exception(watermark_result['message'])
+                # watermark_result = watermarker.apply_watermark(
+                #     input_path=temp_path,
+                #     output_path=processed_path,
+                #     watermark_text=f"Protected - {video_id[:8]}"
+                # )
+                # if not watermark_result['success']:
+                #     raise Exception(watermark_result['message'])
                 
                 # Encrypt the watermarked video
                 encryption_result = encryptor.encrypt_file(
-                    input_path=processed_path,
+                    input_path=temp_path,
                     output_path=encrypted_path
                 )
                 if not encryption_result['success']:
@@ -247,7 +247,7 @@ def upload_video():
                 key_result = encryptor.save_key(key_path)
                 if not key_result['success']:
                     raise Exception(key_result['message'])
-                
+                print("11")
                 # Get video metadata
                 cap = cv2.VideoCapture(temp_path)
                 size_bytes = os.path.getsize(temp_path)
@@ -298,6 +298,36 @@ def upload_video():
     
     return {'success': False, 'message': 'File type not allowed'}, 400
 
+@app.route('/videos')
+def get_user_videos():
+    if 'user' not in session:
+        return {'success': False, 'message': 'User not authenticated'}, 401
+        
+    try:
+        conn = sqlite3.connect('videos.db')
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT video_id, original_filename, upload_date, fingerprint 
+            FROM user_videos 
+            WHERE user_email = ? 
+            ORDER BY upload_date DESC
+        """, (session['user']['email'],))
+        
+        videos = [{
+            'video_id': row[0],
+            'filename': row[1],
+            'upload_date': row[2],
+            'fingerprint': row[3]
+        } for row in cursor.fetchall()]
+        
+        conn.close()
+        return {'success': True, 'videos': videos}
+        
+    except Exception as e:
+        if 'conn' in locals():
+            conn.close()
+        return {'success': False, 'message': str(e)}, 500
+
 @app.route('/download/<video_id>/<version>')
 def download_video(video_id, version):
     if 'user' not in session:
@@ -328,6 +358,7 @@ def download_video(video_id, version):
                     # Create temporary file for decryption
                     temp_path = f"uploads/processed/temp_download_{video_id}.mp4"
                     
+
                     # Decrypt the file
                     decrypt_result = temp_encryptor.decrypt_file(
                         input_path=encrypted_path,
@@ -337,9 +368,18 @@ def download_video(video_id, version):
                     if not decrypt_result['success']:
                         raise Exception(decrypt_result['message'])
                     
+                    watermark_result = watermarker.apply_watermark(
+                        input_path=temp_path,
+                        output_path=f"uploads/processed/processed_{video_id}.mp4",
+                        watermark_text=f"Protected - {session["user"]['id']}.{session["user"]["created_at"].replace('-','').replace(' ', '').replace(':', '')}"
+                    )
+                    if not watermark_result['success']:
+                        raise Exception(watermark_result['message'])
+                    print("watermark done")
+
                     # Send the decrypted file
                     response = send_file(
-                        temp_path,
+                        f"uploads/processed/processed_{video_id}.mp4",
                         as_attachment=True,
                         download_name=f"protected_{original_filename}"
                     )
@@ -396,4 +436,4 @@ def view_video(video_id):
         return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
