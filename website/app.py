@@ -247,7 +247,7 @@ def upload_video():
                 key_result = encryptor.save_key(key_path)
                 if not key_result['success']:
                     raise Exception(key_result['message'])
-                print("11")
+                
                 # Get video metadata
                 cap = cv2.VideoCapture(temp_path)
                 size_bytes = os.path.getsize(temp_path)
@@ -297,36 +297,6 @@ def upload_video():
             return {'success': False, 'message': f'Error: {str(e)}'}, 500
     
     return {'success': False, 'message': 'File type not allowed'}, 400
-
-@app.route('/videos')
-def get_user_videos():
-    if 'user' not in session:
-        return {'success': False, 'message': 'User not authenticated'}, 401
-        
-    try:
-        conn = sqlite3.connect('videos.db')
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT video_id, original_filename, upload_date, fingerprint 
-            FROM user_videos 
-            WHERE user_email = ? 
-            ORDER BY upload_date DESC
-        """, (session['user']['email'],))
-        
-        videos = [{
-            'video_id': row[0],
-            'filename': row[1],
-            'upload_date': row[2],
-            'fingerprint': row[3]
-        } for row in cursor.fetchall()]
-        
-        conn.close()
-        return {'success': True, 'videos': videos}
-        
-    except Exception as e:
-        if 'conn' in locals():
-            conn.close()
-        return {'success': False, 'message': str(e)}, 500
 
 @app.route('/download/<video_id>/<version>')
 def download_video(video_id, version):
@@ -426,4 +396,4 @@ def view_video(video_id):
         return redirect(url_for('index'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)

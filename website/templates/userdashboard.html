@@ -88,8 +88,13 @@
                     <span class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">AntiPiracy Dashboard</span>
                 </div>
                 <div class="flex items-center space-x-4">
+                    <a href="/userdashboard" class="nav-link active">
+                        <i class="fas fa-home"></i> Home
+                    </a>
                     <span class="text-gray-400">Welcome, {{ session.user.username }}</span>
-                    <a href="{{ url_for('logout') }}" class="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-colors">Logout</a>
+                    <a href="/logout" class="nav-link">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
                 </div>
             </div>
         </div>
@@ -206,7 +211,7 @@
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Applying Watermark...</span>
+                            <span class="text-gray-300">Encrypting Video...</span>
                         </div>
                     </div>
                     
@@ -218,7 +223,7 @@
                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
                             </div>
-                            <span class="text-gray-300">Encrypting Video...</span>
+                            <span class="text-gray-300">Applying Watermark...</span>
                         </div>
                     </div>
                 </div>
