@@ -339,8 +339,8 @@ def download_video(video_id, version):
             cursor.execute("""
                 SELECT processed_path, encrypted_path, encryption_key_path, original_filename
                 FROM user_videos 
-                WHERE video_id = ? AND user_email = ?
-            """, (video_id, session['user']['email']))
+                WHERE video_id = ?
+            """, (video_id,))
             
             result = cursor.fetchone()
             
@@ -434,6 +434,129 @@ def view_video(video_id):
     except Exception as e:
         flash(f'Error: {str(e)}', 'error')
         return redirect(url_for('index'))
+
+@app.route('/my-videos')
+def my_videos():
+    """Show all videos uploaded by the current user."""
+    if 'user' not in session:
+        flash('Please log in to access your videos.', 'error')
+        return redirect(url_for('getin'))
+        
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # Get all videos for this user
+            cursor.execute("""
+                SELECT 
+                    video_id, original_filename, upload_date,
+                    fingerprint, size_bytes, duration_seconds,
+                    status
+                FROM user_videos 
+                WHERE user_email = ? 
+                ORDER BY upload_date DESC
+            """, (session['user']['email'],))
+            
+            videos_data = cursor.fetchall()
+            
+            videos = [{
+                'video_id': row[0],
+                'filename': row[1],
+                'upload_date': row[2],
+                'fingerprint': row[3],
+                'size_mb': round(row[4] / (1024 * 1024), 2),
+                'duration': round(row[5], 2),
+                'status': row[6]
+            } for row in videos_data]
+            
+            # Calculate stats
+            stats = {
+                'total_videos': len(videos),
+                'total_size': round(sum(v['size_mb'] for v in videos), 2),
+                'total_duration': round(sum(v['duration'] for v in videos) / 60, 2),  # Convert to minutes
+                'latest_upload_date': videos[0]['upload_date'] if videos else "No uploads yet"
+            }
+            
+            return render_template('my_videos.html', videos=videos, stats=stats)
+            
+    except Exception as e:
+        flash(f'Error loading videos: {str(e)}', 'error')
+        return redirect(url_for('userdashboard'))
+
+@app.route('/delete-video/<video_id>', methods=['POST'])
+def delete_video(video_id):
+    """Delete a video and all associated files."""
+    if 'user' not in session:
+        return {'success': False, 'message': 'User not authenticated'}, 401
+        
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            
+            # First check if video exists and belongs to user
+            cursor.execute("""
+                SELECT processed_path, encrypted_path, encryption_key_path 
+                FROM user_videos 
+                WHERE video_id = ? AND user_email = ?
+            """, (video_id, session['user']['email']))
+            
+            result = cursor.fetchone()
+            
+            if not result:
+                return {'success': False, 'message': 'Video not found or permission denied'}, 404
+                
+            processed_path, encrypted_path, key_path = result
+            
+            # Delete files
+            for path in [processed_path, encrypted_path, key_path]:
+                if path and os.path.exists(path):
+                    os.remove(path)
+            
+            # Delete from database
+            cursor.execute("DELETE FROM user_videos WHERE video_id = ?", (video_id,))
+            
+            return {'success': True, 'message': 'Video deleted successfully'}
+            
+    except Exception as e:
+        return {'success': False, 'message': str(e)}, 500
+
+@app.route('/video-info/<video_id>')
+def get_video_info(video_id):
+    """API endpoint to get information about a video by its ID."""
+    if 'user' not in session:
+        return {'success': False, 'message': 'User not authenticated'}, 401
+        
+    try:
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT 
+                    video_id, original_filename, upload_date,
+                    fingerprint, size_bytes, duration_seconds,
+                    status
+                FROM user_videos 
+                WHERE video_id = ?
+            """, (video_id,))
+            
+            result = cursor.fetchone()
+            
+            if not result:
+                return {'success': False, 'message': 'Video not found'}, 404
+                
+            video = {
+                'video_id': result[0],
+                'filename': result[1],
+                'upload_date': result[2],
+                'fingerprint': result[3],
+                'size_mb': round(result[4] / (1024 * 1024), 2),
+                'duration': round(result[5], 2),
+                'status': result[6]
+            }
+            
+            return {'success': True, 'video': video}
+            
+    except Exception as e:
+        return {'success': False, 'message': str(e)}, 500
 
 if __name__ == '__main__':
     app.run(debug=True)

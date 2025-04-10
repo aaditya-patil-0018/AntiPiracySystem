@@ -88,12 +88,16 @@
                     <span class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">AntiPiracy Dashboard</span>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <a href="/userdashboard" class="nav-link active">
-                        <i class="fas fa-home"></i> Home
+                    <a href="/userdashboard" class="nav-link active py-2 border-b-2 border-primary">
+                        Dashboard
                     </a>
+                    <a href="/my-videos" class="nav-link py-2 text-gray-400 hover:text-white transition-colors">
+                        My Videos
+                    </a>
+                    <span class="text-gray-400">|</span>
                     <span class="text-gray-400">Welcome, {{ session.user.username }}</span>
-                    <a href="/logout" class="nav-link">
-                        <i class="fas fa-sign-out-alt"></i> Logout
+                    <a href="/logout" class="nav-link py-2 px-4 bg-red-500/10 text-red-400 rounded-lg hover:bg-red-500/20 transition-colors">
+                        Logout
                     </a>
                 </div>
             </div>
@@ -117,36 +121,61 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <!-- Left Side - Upload Area -->
             <div class="glass-effect rounded-xl p-6 dash-border">
-                <h2 class="text-xl font-semibold mb-6">Upload Video</h2>
+                <!-- Tab Navigation -->
+                <div class="flex space-x-4 mb-6 border-b border-white/10 pb-4">
+                    <button id="uploadTabBtn" class="py-2 px-4 text-primary border-b-2 border-primary">Upload Video</button>
+                    <button id="requestTabBtn" class="py-2 px-4 text-gray-400 hover:text-white transition-colors">Request Video</button>
+                </div>
                 
-                <!-- Upload Area -->
-                <div id="uploadArea" class="upload-area dash-border rounded-xl p-8 text-center cursor-pointer hover:border-primary transition-colors">
-                    <div class="space-y-4">
-                        <div class="w-16 h-16 mx-auto bg-primary/20 rounded-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                            </svg>
+                <!-- Upload Tab Content -->
+                <div id="uploadTabContent">
+                    <!-- Upload Area -->
+                    <div id="uploadArea" class="upload-area dash-border rounded-xl p-8 text-center cursor-pointer hover:border-primary transition-colors">
+                        <div class="space-y-4">
+                            <div class="w-16 h-16 mx-auto bg-primary/20 rounded-full flex items-center justify-center">
+                                <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-lg font-medium">Drag and drop your video here</p>
+                                <p class="text-sm text-gray-400 mt-1">or</p>
+                                <label class="inline-block mt-2 px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors cursor-pointer">
+                                    Browse Files
+                                    <input type="file" id="fileInput" class="hidden" accept="video/*">
+                                </label>
+                            </div>
+                            <p class="text-xs text-gray-400">Supported formats: MP4, MOV, AVI</p>
                         </div>
-                        <div>
-                            <p class="text-lg font-medium">Drag and drop your video here</p>
-                            <p class="text-sm text-gray-400 mt-1">or</p>
-                            <label class="inline-block mt-2 px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors cursor-pointer">
-                                Browse Files
-                                <input type="file" id="fileInput" class="hidden" accept="video/*">
-                            </label>
+                    </div>
+
+                    <!-- Upload Progress -->
+                    <div id="uploadProgress" class="hidden mt-6">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span>Uploading...</span>
+                            <span id="progressText">0%</span>
                         </div>
-                        <p class="text-xs text-gray-400">Supported formats: MP4, MOV, AVI</p>
+                        <div class="h-2 bg-white/5 rounded-full overflow-hidden">
+                            <div id="progressBar" class="progress-bar h-full bg-primary w-0"></div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Upload Progress -->
-                <div id="uploadProgress" class="hidden mt-6">
-                    <div class="flex justify-between text-sm mb-2">
-                        <span>Uploading...</span>
-                        <span id="progressText">0%</span>
-                    </div>
-                    <div class="h-2 bg-white/5 rounded-full overflow-hidden">
-                        <div id="progressBar" class="progress-bar h-full bg-primary w-0"></div>
+                
+                <!-- Request Tab Content -->
+                <div id="requestTabContent" class="hidden">
+                    <div class="glass-effect rounded-lg p-6">
+                        <h3 class="text-lg font-medium mb-4">Enter Access Code</h3>
+                        <p class="text-sm text-gray-400 mb-4">Enter the access code provided by the video owner to download the protected video.</p>
+                        
+                        <div class="mb-4">
+                            <label for="accessCode" class="block text-sm font-medium text-gray-300 mb-2">Access Code</label>
+                            <input type="text" id="accessCode" placeholder="Enter video access code (e.g., video ID)" 
+                                   class="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-3 text-gray-200 focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        
+                        <button id="requestVideoSubmit" class="w-full bg-primary hover:bg-primary/90 text-white py-3 rounded-lg transition-colors">
+                            Find Video
+                        </button>
                     </div>
                 </div>
 
@@ -187,7 +216,7 @@
 
             <!-- Right Side - Output Area -->
             <div class="glass-effect rounded-xl p-6 dash-border">
-                <h2 class="text-xl font-semibold mb-6">Processing Status</h2>
+                <h2 class="text-xl font-semibold mb-6" id="rightSideTitle">Processing Status</h2>
                 
                 <!-- Processing Steps -->
                 <div id="processingSteps" class="space-y-6 mb-8 hidden">
@@ -246,6 +275,23 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Request Results -->
+                <div id="requestResults" class="hidden">
+                    <div class="glass-effect rounded-lg p-4">
+                        <h4 class="font-medium mb-2" id="requestedVideoTitle">Video Title</h4>
+                        <p class="text-sm text-gray-400 mb-3" id="requestedVideoDetails">Size • Duration • Upload Date</p>
+                        
+                        <div class="flex justify-between">
+                            <button id="downloadRequestedVideo" class="flex items-center space-x-2 px-4 py-2 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                <span>Download</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -257,6 +303,58 @@
         const uploadProgress = document.getElementById('uploadProgress');
         const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
+
+        // Tab navigation elements
+        const uploadTabBtn = document.getElementById('uploadTabBtn');
+        const requestTabBtn = document.getElementById('requestTabBtn');
+        const uploadTabContent = document.getElementById('uploadTabContent');
+        const requestTabContent = document.getElementById('requestTabContent');
+        const processingSteps = document.getElementById('processingSteps');
+        const rightSideTitle = document.getElementById('rightSideTitle');
+        const shareLinkSection = document.getElementById('shareLinkSection');
+        const requestVideoSubmit = document.getElementById('requestVideoSubmit');
+        const accessCode = document.getElementById('accessCode');
+        const requestResults = document.getElementById('requestResults');
+        const requestedVideoTitle = document.getElementById('requestedVideoTitle');
+        const requestedVideoDetails = document.getElementById('requestedVideoDetails');
+        const downloadRequestedVideo = document.getElementById('downloadRequestedVideo');
+
+        // Tab switching
+        uploadTabBtn.addEventListener('click', () => {
+            // Update active tab styles
+            uploadTabBtn.classList.add('text-primary', 'border-b-2', 'border-primary');
+            uploadTabBtn.classList.remove('text-gray-400');
+            requestTabBtn.classList.remove('text-primary', 'border-b-2', 'border-primary');
+            requestTabBtn.classList.add('text-gray-400');
+            
+            // Show/hide content
+            uploadTabContent.classList.remove('hidden');
+            requestTabContent.classList.add('hidden');
+            
+            // Reset right side
+            rightSideTitle.textContent = 'Processing Status';
+            processingSteps.classList.add('hidden');
+            shareLinkSection.classList.add('hidden');
+            requestResults.classList.add('hidden');
+        });
+        
+        requestTabBtn.addEventListener('click', () => {
+            // Update active tab styles
+            requestTabBtn.classList.add('text-primary', 'border-b-2', 'border-primary');
+            requestTabBtn.classList.remove('text-gray-400');
+            uploadTabBtn.classList.remove('text-primary', 'border-b-2', 'border-primary');
+            uploadTabBtn.classList.add('text-gray-400');
+            
+            // Show/hide content
+            requestTabContent.classList.remove('hidden');
+            uploadTabContent.classList.add('hidden');
+            
+            // Update right side
+            rightSideTitle.textContent = 'Request Results';
+            processingSteps.classList.add('hidden');
+            shareLinkSection.classList.add('hidden');
+            requestResults.classList.add('hidden');
+        });
 
         // Prevent default drag behaviors
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -351,8 +449,11 @@
                     const shareLink = `${window.location.origin}/video/${result.video_id}`;
                     document.getElementById('shareLink').value = shareLink;
 
-                    // Show success message
-                    showFlashMessage('File processed successfully!', 'success');
+                    // Show success message with button to view all videos
+                    showFlashMessage(
+                        `File processed successfully! <a href="/my-videos" class="ml-2 underline">View in My Videos</a>`, 
+                        'success'
+                    );
                     
                     // Add to recent uploads
                     addRecentUpload(file.name, file.size);
@@ -455,7 +556,7 @@
                 type === 'success' ? 'bg-green-500/20 text-green-200' :
                 'bg-blue-500/20 text-blue-200'
             }`;
-            flashContainer.textContent = message;
+            flashContainer.innerHTML = message;
 
             const container = document.querySelector('.container');
             container.insertBefore(flashContainer, container.firstChild);
@@ -475,6 +576,36 @@
                 showFlashMessage('File deleted successfully!', 'success');
             }
         }
+
+        // Request Video Functionality
+        requestVideoSubmit.addEventListener('click', async () => {
+            const code = accessCode.value.trim();
+            if (!code) {
+                showFlashMessage('Please enter an access code', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/video-info/${code}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    // Show video info
+                    requestResults.classList.remove('hidden');
+                    requestedVideoTitle.textContent = data.video.filename;
+                    requestedVideoDetails.textContent = `${data.video.size_mb} MB • ${data.video.duration} sec • ${new Date(data.video.upload_date).toLocaleDateString()}`;
+                    
+                    // Setup download button
+                    downloadRequestedVideo.onclick = () => {
+                        window.location.href = `/download/${code}/processed`;
+                    };
+                } else {
+                    showFlashMessage(data.message || 'Video not found', 'error');
+                }
+            } catch (error) {
+                showFlashMessage('Error retrieving video information', 'error');
+            }
+        });
     </script>
 </body>
 </html>
