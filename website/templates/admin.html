@@ -70,7 +70,11 @@
                 </div>
                 <div class="flex items-center space-x-4">
                     <a href="{{ url_for('index') }}" class="text-gray-300 hover:text-primary transition-colors">Home</a>
-                    <a href="{{ url_for('logout') }}" class="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-colors">Logout</a>
+                    <a href="{{ url_for('admin_detect_watermark') }}" class="text-gray-300 hover:text-primary transition-colors">Watermark Detection</a>
+                    <div class="px-3 py-2 bg-primary/20 text-primary rounded-lg">
+                        Admin: {{ session.admin.email }}
+                    </div>
+                    <a href="{{ url_for('admin_logout') }}" class="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-colors">Logout</a>
                 </div>
             </div>
         </div>

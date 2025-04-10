@@ -13,9 +13,15 @@ import shutil
 import cv2
 from contextlib import contextmanager
 from encryption.video_encryption import VideoEncryption
+from deepwater import PremiumWatermarker
+from watermark_detector import WatermarkDetector
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'  # Change this to a secure secret key
+
+# Configure admin credentials
+ADMIN_EMAIL = "admin@gmail.com"
+ADMIN_PASSWORD = "admin"
 
 # Configure upload folder
 UPLOAD_FOLDER = 'uploads'
@@ -27,7 +33,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Admin credentials (in production, use environment variables)
 ADMIN_USERNAME = "admin"
-ADMIN_PASSWORD = "admin123"
 
 # Initialize user manager
 user_manager = User()
@@ -38,6 +43,14 @@ watermarker = VideoWatermarker(
     alpha=0.3,
     watermark_interval_sec=5
 )
+
+# Initialize premium watermarker (deepwater)
+premium_watermarker = PremiumWatermarker(
+    secret_key="corporate_secure_key_2024"
+)
+
+# Initialize watermark detector
+watermark_detector = WatermarkDetector()
 
 # Initialize encryption system with the other initializations
 encryptor = VideoEncryption()
@@ -100,6 +113,37 @@ def allowed_file(filename):
 def index():
     return render_template('index.html')
 
+@app.route('/admin-login', methods=["GET", "POST"])
+def admin_login():
+    """Admin login page with dedicated credentials."""
+    # Check if admin is already logged in
+    if 'admin' in session:
+        return redirect(url_for('admin'))
+        
+    if request.method == "POST":
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        if email == ADMIN_EMAIL and password == ADMIN_PASSWORD:
+            # Create admin session
+            session['admin'] = {
+                'email': email,
+                'is_admin': True
+            }
+            flash('Admin login successful', 'success')
+            return redirect(url_for('admin'))
+        else:
+            flash('Invalid admin credentials', 'error')
+    
+    return render_template('admin_login.html')
+
+@app.route('/admin-logout')
+def admin_logout():
+    """Admin logout function."""
+    session.pop('admin', None)
+    flash('Admin logged out successfully', 'info')
+    return redirect(url_for('admin_login'))
+
 @app.route('/getin', methods=["GET", "POST"])
 def getin():
     if request.method == "POST":
@@ -154,10 +198,10 @@ def logout():
 
 @app.route('/admin', methods=["GET", "POST"])
 def admin():
-    # Check if user is logged in as admin
-    if 'user' not in session or session['user']['username'] != ADMIN_USERNAME:
-        # flash('Admin access required.', 'error')
-        return redirect(url_for('getin'))
+    # Check if admin is logged in with dedicated admin session
+    if 'admin' not in session:
+        flash('Admin access required', 'error')
+        return redirect(url_for('admin_login'))
 
     if request.method == "POST":
         action = request.form.get('action')
@@ -169,13 +213,13 @@ def admin():
             
         if action == 'delete':
             result = user_manager.delete_user(username)
-            # flash(result['message'], 'success' if result['success'] else 'error')
+            flash(result['message'], 'success' if result['success'] else 'error')
         elif action == 'toggle_active':
             user = user_manager.get_user_by_username(username)
             if user:
                 new_status = not user['is_active']
                 result = user_manager.update_user(username, is_active=new_status)
-                # flash(result['message'], 'success' if result['success'] else 'error')
+                flash(result['message'], 'success' if result['success'] else 'error')
 
     # Get all users for display
     users = user_manager.get_all_users()
@@ -208,12 +252,14 @@ def upload_video():
             # Create unique filenames
             temp_original = f"temp_{video_id}{file_extension}"
             processed_name = f"processed_{video_id}{file_extension}"
+            deepwater_name = f"deepwater_{video_id}{file_extension}"
             encrypted_name = f"encrypted_{video_id}{file_extension}.enc"
             key_name = f"key_{video_id}.key"
             
             # Setup paths
             temp_path = os.path.join('uploads/original', temp_original)
             processed_path = os.path.join('uploads/processed', processed_name)
+            deepwater_path = os.path.join('uploads/processed', deepwater_name)
             encrypted_path = os.path.join('uploads/processed', encrypted_name)
             key_path = os.path.join('uploads/processed', key_name)
             
@@ -226,18 +272,32 @@ def upload_video():
                 if not fingerprint_result['success']:
                     raise Exception(fingerprint_result['message'])
                 
-                # Apply watermark
-                # watermark_result = watermarker.apply_watermark(
-                #     input_path=temp_path,
-                #     output_path=processed_path,
-                #     watermark_text=f"Protected - {video_id[:8]}"
-                # )
-                # if not watermark_result['success']:
-                #     raise Exception(watermark_result['message'])
+                # Apply visible watermark
+                watermark_result = watermarker.apply_watermark(
+                    input_path=temp_path,
+                    output_path=processed_path,
+                    watermark_text=f"Protected - {session['user']['id']}.{session['user']['created_at'].replace('-','').replace(' ', '').replace(':', '')}"
+                )
+                if not watermark_result['success']:
+                    raise Exception(watermark_result['message'])
+                
+                # Apply deep watermark with user ID
+                user_id = session['user']['id']
+                premium_watermarker.user_id = user_id
+                try:
+                    premium_watermarker.embed_video(
+                        input_path=processed_path,
+                        output_path=deepwater_path
+                    )
+                    actual_deepwater_path = deepwater_path
+                except Exception as dw_error:
+                    # If deepwater fails, use the regular watermarked file instead
+                    actual_deepwater_path = processed_path
+                    print(f"Deepwater watermarking failed: {str(dw_error)}")
                 
                 # Encrypt the watermarked video
                 encryption_result = encryptor.encrypt_file(
-                    input_path=temp_path,
+                    input_path=actual_deepwater_path,
                     output_path=encrypted_path
                 )
                 if not encryption_result['success']:
@@ -247,7 +307,7 @@ def upload_video():
                 key_result = encryptor.save_key(key_path)
                 if not key_result['success']:
                     raise Exception(key_result['message'])
-                print("11")
+                
                 # Get video metadata
                 cap = cv2.VideoCapture(temp_path)
                 size_bytes = os.path.getsize(temp_path)
@@ -266,7 +326,7 @@ def upload_video():
                         ) VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?, ?, ?)
                     """, (
                         video_id, session['user']['email'], original_filename,
-                        processed_path, encrypted_path, key_path,
+                        actual_deepwater_path, encrypted_path, key_path,
                         fingerprint_result['fingerprint'], size_bytes,
                         duration_seconds, 'completed'
                     ))
@@ -284,14 +344,14 @@ def upload_video():
                 
             except Exception as process_error:
                 # Clean up all files on error
-                for path in [temp_path, processed_path, encrypted_path, key_path]:
+                for path in [temp_path, processed_path, deepwater_path, encrypted_path, key_path]:
                     if os.path.exists(path):
                         os.remove(path)
                 raise Exception(f"Processing error: {str(process_error)}")
             
         except Exception as e:
             # Clean up any files that might have been created
-            for path in [temp_path, processed_path, encrypted_path, key_path]:
+            for path in [temp_path, processed_path, deepwater_path, encrypted_path, key_path]:
                 if 'path' in locals() and os.path.exists(path):
                     os.remove(path)
             return {'success': False, 'message': f'Error: {str(e)}'}, 500
@@ -367,19 +427,23 @@ def download_video(video_id, version):
                     
                     if not decrypt_result['success']:
                         raise Exception(decrypt_result['message'])
-                    
-                    watermark_result = watermarker.apply_watermark(
-                        input_path=temp_path,
-                        output_path=f"uploads/processed/processed_{video_id}.mp4",
-                        watermark_text=f"Protected - {session["user"]['id']}.{session["user"]["created_at"].replace('-','').replace(' ', '').replace(':', '')}"
-                    )
-                    if not watermark_result['success']:
-                        raise Exception(watermark_result['message'])
-                    print("watermark done")
+
+                    # Apply visible watermark if needed - keeping this for compatibility
+                    if not os.path.exists(processed_path):
+                        watermark_result = watermarker.apply_watermark(
+                            input_path=temp_path,
+                            output_path=f"uploads/processed/processed_{video_id}.mp4",
+                            watermark_text=f"Protected - {session['user']['id']}.{session['user']['created_at'].replace('-','').replace(' ', '').replace(':', '')}"
+                        )
+                        if not watermark_result['success']:
+                            raise Exception(watermark_result['message'])
+                        send_path = f"uploads/processed/processed_{video_id}.mp4"
+                    else:
+                        send_path = temp_path
 
                     # Send the decrypted file
                     response = send_file(
-                        f"uploads/processed/processed_{video_id}.mp4",
+                        send_path,
                         as_attachment=True,
                         download_name=f"protected_{original_filename}"
                     )
@@ -557,6 +621,144 @@ def get_video_info(video_id):
             
     except Exception as e:
         return {'success': False, 'message': str(e)}, 500
+
+@app.route('/admin/detect-watermark', methods=['GET', 'POST'])
+def admin_detect_watermark():
+    """Admin function to detect watermarks in uploaded videos."""
+    # Check if admin is logged in
+    if 'admin' not in session:
+        flash('Admin access required.', 'error')
+        return redirect(url_for('admin_login'))
+
+    if request.method == 'POST':
+        # Process the uploaded video for watermark detection
+        if 'video' not in request.files:
+            flash('No file part', 'error')
+            return redirect(request.url)
+        
+        file = request.files['video']
+        if file.filename == '':
+            flash('No selected file', 'error')
+            return redirect(request.url)
+        
+        if file and allowed_file(file.filename):
+            try:
+                # Save the file temporarily
+                temp_filename = secure_filename(file.filename)
+                temp_path = os.path.join('uploads/original', f"detect_{temp_filename}")
+                file.save(temp_path)
+                
+                # Get list of users for detection
+                with get_db_connection() as conn:
+                    cursor = conn.cursor()
+                    # Get user IDs from the user_videos table instead of users table
+                    cursor.execute("SELECT DISTINCT user_email FROM user_videos")
+                    user_emails = [row[0] for row in cursor.fetchall()]
+                    
+                    # Map emails to IDs for watermark detection
+                    user_ids = []
+                    for email in user_emails:
+                        cursor.execute("SELECT video_id FROM user_videos WHERE user_email = ? LIMIT 1", (email,))
+                        id_row = cursor.fetchone()
+                        if id_row:
+                            user_ids.append(str(id_row[0]))
+                
+                # Detect watermarks
+                detection_results = {}
+                
+                # Check for deepwater watermark
+                try:
+                    # Detect master watermark (corporate)
+                    corporate_detector = PremiumWatermarker(
+                        secret_key="corporate_secure_key_2024"
+                    )
+                    deepwater_result = corporate_detector.detect_watermarks(temp_path)
+                    detection_results['premium'] = deepwater_result
+                    
+                    # For each user, try detecting their watermark
+                    best_user_match = None
+                    best_confidence = 0
+                    
+                    for user_id in user_ids:
+                        user_detector = PremiumWatermarker(
+                            secret_key="corporate_secure_key_2024",
+                            user_id=user_id
+                        )
+                        user_result = user_detector.detect_watermarks(temp_path)
+                        if user_result['user']['detected'] and user_result['user']['confidence'] > best_confidence:
+                            best_user_match = user_id
+                            best_confidence = user_result['user']['confidence']
+                    
+                    if best_user_match:
+                        detection_results['premium']['user']['id'] = best_user_match
+                        detection_results['premium']['user']['detected'] = True
+                        detection_results['premium']['user']['confidence'] = best_confidence
+                    
+                except Exception as e:
+                    detection_results['premium'] = {
+                        'error': str(e),
+                        'master': {'detected': False, 'confidence': 0.0},
+                        'user': {'detected': False, 'confidence': 0.0, 'id': None}
+                    }
+                
+                # Check for standard watermark using detector
+                try:
+                    detector = WatermarkDetector()
+                    standard_result = detector.detect_user(temp_path, user_ids)
+                    detection_results['standard'] = standard_result
+                except Exception as e:
+                    detection_results['standard'] = {
+                        'error': str(e),
+                        'detected': False, 
+                        'user_id': None, 
+                        'confidence': 0.0
+                    }
+                
+                # Clean up
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                
+                # If user identified, get their details
+                identified_user = None
+                user_id = None
+                
+                if detection_results['premium']['user']['detected']:
+                    user_id = detection_results['premium']['user']['id']
+                elif detection_results['standard']['detected']:
+                    user_id = detection_results['standard']['user_id']
+                
+                if user_id:
+                    with get_db_connection() as conn:
+                        cursor = conn.cursor()
+                        # Query user_videos by video_id
+                        cursor.execute("SELECT user_email, video_id, upload_date FROM user_videos WHERE video_id = ?", (user_id,))
+                        user_data = cursor.fetchone()
+                        if not user_data:
+                            # Try as partial match in case we only have a prefix
+                            cursor.execute("SELECT user_email, video_id, upload_date FROM user_videos WHERE video_id LIKE ?", (f"{user_id}%",))
+                            user_data = cursor.fetchone()
+                            
+                        if user_data:
+                            identified_user = {
+                                'id': user_id,
+                                'email': user_data[0],
+                                'video_id': user_data[1],
+                                'upload_date': user_data[2]
+                            }
+                
+                return render_template(
+                    'watermark_detection.html', 
+                    results=detection_results,
+                    identified_user=identified_user
+                )
+                
+            except Exception as e:
+                flash(f'Error during detection: {str(e)}', 'error')
+                if 'temp_path' in locals() and os.path.exists(temp_path):
+                    os.remove(temp_path)
+    
+    # GET request - show the upload form
+    return render_template('watermark_detection.html')
 
 if __name__ == '__main__':
     app.run(debug=True)

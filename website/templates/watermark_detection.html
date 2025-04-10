@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBSCURE - Watermark Detection</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366F1' stroke-width='2'><rect x='3' y='11' width='18' height='11' rx='2' ry='2'></rect><path d='M7 11V7a5 5 0 0 1 10 0v4'></path></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366F1',  // Indigo
+                        secondary: '#4F46E5', // Deep Indigo
+                        dark: '#0F172A',     // Slate
+                    },
+                    animation: {
+                        'gradient': 'gradient 8s linear infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen">
+    <!-- Navigation -->
+    <nav class="glass-effect fixed w-full z-50">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div class="flex items-center space-x-3">
+                        <!-- Obscure Logo -->
+                        <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-secondary">
+                            <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-2xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">OBSCURE</span>
+                            <span class="text-xs text-gray-400">Secure. Traceable. Yours.</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('admin') }}" class="text-gray-300 hover:text-primary transition-colors">Admin Dashboard</a>
+                    <a href="{{ url_for('index') }}" class="text-gray-300 hover:text-primary transition-colors">Home</a>
+                    <div class="px-3 py-2 bg-primary/20 text-primary rounded-lg">
+                        Admin: {{ session.admin.email }}
+                    </div>
+                    <a href="{{ url_for('admin_logout') }}" class="px-4 py-2 bg-red-500/20 text-red-300 rounded-lg hover:bg-red-500/30 transition-colors">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 pt-24 pb-12">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="mb-6 p-4 rounded-lg {% if category == 'error' %}bg-red-500/20 text-red-200{% elif category == 'success' %}bg-green-500/20 text-green-200{% else %}bg-blue-500/20 text-blue-200{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="glass-effect rounded-xl p-6 mb-8">
+            <h2 class="text-2xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Watermark Detection Panel</h2>
+            <p class="text-gray-300 mb-6">Upload a video to detect hidden watermarks and identify the source.</p>
+            
+            <form action="{{ url_for('admin_detect_watermark') }}" method="post" enctype="multipart/form-data" class="mb-6">
+                <div class="mb-4">
+                    <label class="block text-gray-300 mb-2">Select Video File</label>
+                    <input type="file" name="video" accept=".mp4,.mov,.avi" class="w-full px-4 py-2 bg-white/5 border border-gray-700 rounded-lg text-white">
+                </div>
+                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-primary to-secondary rounded-lg text-white font-medium hover:opacity-90 transition-opacity">
+                    Analyze Video
+                </button>
+            </form>
+        </div>
+
+        {% if results is defined %}
+        <div class="glass-effect rounded-xl p-6 mb-8">
+            <h3 class="text-xl font-bold mb-6">Detection Results</h3>
+            
+            {% if identified_user %}
+            <div class="mb-8 p-6 bg-green-500/20 rounded-xl">
+                <h4 class="text-lg font-bold text-green-300 flex items-center mb-3">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Source Identified
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-gray-300 mb-1">User ID:</p>
+                        <p class="font-medium">{{ identified_user.id }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-300 mb-1">Email:</p>
+                        <p class="font-medium">{{ identified_user.email }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-300 mb-1">Video ID:</p>
+                        <p class="font-medium">{{ identified_user.video_id }}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-300 mb-1">Upload Date:</p>
+                        <p class="font-medium">{{ identified_user.upload_date }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Premium Watermark Results -->
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold mb-3">Premium Watermark Detection</h4>
+                {% if results.premium.error is defined %}
+                    <div class="p-4 bg-red-500/20 rounded-lg text-red-300 mb-3">
+                        Error: {{ results.premium.error }}
+                    </div>
+                {% else %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <!-- Corporate Watermark -->
+                        <div class="glass-effect rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <span class="mr-2 {% if results.premium.master.detected %}text-green-400{% else %}text-red-400{% endif %}">
+                                    {% if results.premium.master.detected %}
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    {% else %}
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    {% endif %}
+                                </span>
+                                <h5 class="font-medium">Corporate Watermark</h5>
+                            </div>
+                            <p class="text-sm text-gray-400">Status: 
+                                <span class="{% if results.premium.master.detected %}text-green-400{% else %}text-red-400{% endif %}">
+                                    {{ "Detected" if results.premium.master.detected else "Not Detected" }}
+                                </span>
+                            </p>
+                            <p class="text-sm text-gray-400">Confidence: {{ "%.2f"|format(results.premium.master.confidence) }}</p>
+                        </div>
+                        
+                        <!-- User Watermark -->
+                        <div class="glass-effect rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <span class="mr-2 {% if results.premium.user.detected %}text-green-400{% else %}text-red-400{% endif %}">
+                                    {% if results.premium.user.detected %}
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    {% else %}
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    {% endif %}
+                                </span>
+                                <h5 class="font-medium">User Watermark</h5>
+                            </div>
+                            <p class="text-sm text-gray-400">Status: 
+                                <span class="{% if results.premium.user.detected %}text-green-400{% else %}text-red-400{% endif %}">
+                                    {{ "Detected" if results.premium.user.detected else "Not Detected" }}
+                                </span>
+                            </p>
+                            <p class="text-sm text-gray-400">Confidence: {{ "%.2f"|format(results.premium.user.confidence) }}</p>
+                            {% if results.premium.user.detected and results.premium.user.id %}
+                                <p class="text-sm text-gray-400">User ID: <span class="text-primary">{{ results.premium.user.id }}</span></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Standard Watermark Results -->
+            <div>
+                <h4 class="text-lg font-semibold mb-3">Standard Watermark Detection</h4>
+                {% if results.standard.error is defined %}
+                    <div class="p-4 bg-red-500/20 rounded-lg text-red-300 mb-3">
+                        Error: {{ results.standard.error }}
+                    </div>
+                {% else %}
+                    <div class="glass-effect rounded-lg p-4">
+                        <div class="flex items-center mb-2">
+                            <span class="mr-2 {% if results.standard.detected %}text-green-400{% else %}text-red-400{% endif %}">
+                                {% if results.standard.detected %}
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                {% else %}
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                {% endif %}
+                            </span>
+                            <h5 class="font-medium">User Watermark</h5>
+                        </div>
+                        <p class="text-sm text-gray-400">Status: 
+                            <span class="{% if results.standard.detected %}text-green-400{% else %}text-red-400{% endif %}">
+                                {{ "Detected" if results.standard.detected else "Not Detected" }}
+                            </span>
+                        </p>
+                        <p class="text-sm text-gray-400">Confidence: {{ "%.2f"|format(results.standard.confidence) }}</p>
+                        {% if results.standard.detected and results.standard.user_id %}
+                            <p class="text-sm text-gray-400">User ID: <span class="text-primary">{{ results.standard.user_id }}</span></p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Animation for detection result
+        document.addEventListener('DOMContentLoaded', function() {
+            const resultSection = document.querySelector('[data-result]');
+            if (resultSection) {
+                resultSection.classList.add('animate-pulse');
+                setTimeout(() => {
+                    resultSection.classList.remove('animate-pulse');
+                }, 1500);
+            }
+        });
+    </script>
+</body>
+</html> 
