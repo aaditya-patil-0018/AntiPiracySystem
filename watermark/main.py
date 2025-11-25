@@ -73,7 +73,8 @@ while cap.isOpened():
     out.write(frame)
     frame_idx += 1
 
-# === Cleanup ===
+
 cap.release()
 out.release()
 print("✅ Watermarked video saved to:", output_path)
+
